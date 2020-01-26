@@ -40,8 +40,8 @@ stages:
             inputs:
               script: |
                 Install-Module PSScriptAnalyzer
-                Write-Host $(System.DefaultWorkingDirectory)
-                Get-ChildItem -Path "$(System.DefaultWorkingDirectory)" -Recurse
+                Write-Host "Get-ChildItem output:"
+                Get-ChildItem -Recurse
           - task: PowerShell@2
             inputs:
               filePath: "Tests/Invoke-Tests.ps1"
