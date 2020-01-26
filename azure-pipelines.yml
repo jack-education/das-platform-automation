@@ -15,7 +15,7 @@ stages:
         pool:
           vmImage: 'linux-latest'
         steps:
-          - task: gittools.gitversion-preview.gitversion-task.GitVersion@5
+          - task: gittools.gitversion.gitversion-task.GitVersion@5
             displayName: GitVersion
             inputs:
               configFilePath: GitVersion.yml
