@@ -13,7 +13,7 @@ stages:
     jobs:
       - job: "GitVersion"
         pool:
-          vmImage: 'linux-latest'
+          vmImage: 'ubuntu-latest'
         steps:
           - task: gittools.gitversion.gitversion-task.GitVersion@5
             displayName: GitVersion
@@ -38,6 +38,9 @@ stages:
             workingDirectory: $(System.DefaultWorkingDirectory)
           - task: PowerShell@2
             inputs:
+              script: Install-Module PSScriptAnalyzer
+          - task: PowerShell@2
+            inputs:
               filePath: "Tests/Invoke-Tests.ps1"
           - task: PublishTestResults@2
             displayName: "Publish Test Results **/TEST-*.xml"
@@ -53,7 +56,7 @@ stages:
 
       - job: "Linux_PSCore_Build"
         pool:
-          vmImage: 'linux-latest'
+          vmImage: 'ubuntu-latest'
           demands:
             - npm
             - node.js
