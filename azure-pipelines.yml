@@ -13,7 +13,7 @@ stages:
     jobs:
       - job: "GitVersion"
         pool:
-          name: "DAS - Continuous Integration"
+          vmImage: 'linux-latest'
         steps:
           - task: gittools.gitversion-preview.gitversion-task.GitVersion@5
             displayName: GitVersion
@@ -22,9 +22,9 @@ stages:
   - stage: Test
     dependsOn: []
     jobs:
-      - job: "Windows_PS51_Build_DAS_Continuous_Deployment"
+      - job: "Windows_PS51_Build"
         pool:
-          name: "DAS - Continuous Deployment"
+          vmImage: 'windows-latest'
           demands:
             - npm
             - node.js
@@ -45,13 +45,15 @@ stages:
               testResultsFormat: NUnit
               testResultsFiles: "**/TEST-*.xml"
             condition: succeededOrFailed()
-          - publish: $(System.DefaultWorkingDirectory)/Infrastructure-Scripts
-            artifact: Infrastructure-Scripts
+          - publish: |
+              $(System.DefaultWorkingDirectory)/Infrastructure-Scripts
+              $(System.DefaultWorkingDirectory)/Code-Analysis-Scripts
+            artifact: Scripts
             displayName: "Publish Scripts"
 
-      - job: "Linux_PSCore_Build_DAS_Continuous_Integration"
+      - job: "Linux_PSCore_Build"
         pool:
-          name: "DAS - Continuous Integration"
+          vmImage: 'linux-latest'
           demands:
             - npm
             - node.js
@@ -83,21 +85,23 @@ stages:
     - deployment: "GitHubRelease"
       displayName: "Create Release in GitHub"
       pool:
-        name: "DAS - Continuous Deployment"
+        vmImage: 'windows-latest'
       environment: GitHub
       strategy:
         runOnce:
           deploy:
             steps:
               - download: current
-                artifact: Infrastructure-Scripts
+                artifact: Scripts
               - task: GitHubRelease@0
                 inputs:
-                  gitHubConnection: "SFA"
+                  gitHubConnection: "jack-educationGitHub"
                   repositoryName: "$(Build.Repository.Name)"
                   action: "create"
                   target: "$(Build.SourceVersion)"
                   tagSource: "manual"
                   tag: "$(Build.BuildNumber)"
                   addChangeLog: true
-                  assets: "$(Pipeline.Workspace)/Infrastructure-Scripts/**/*.ps1"
+                  assets: |
+                    "$(Pipeline.Workspace)/Infrastructure-Scripts/**/*.ps1"
+                    "$(Pipeline.Workspace)/Code-Analysis-Scripts/**/*.ps1"
